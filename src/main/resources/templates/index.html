@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Expense Tracker</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-primary shadow">
+    <div class="container">
+
+        <span class="navbar-brand">
+            💰 Expense Tracker
+        </span>
+
+        <div class="dropdown">
+
+            <button class="btn btn-light dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown">
+
+                👤 <span th:text="${loggedInUser.name}">Profile</span>
+
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+
+                <li>
+                    <span class="dropdown-item-text"
+                          th:text="${loggedInUser.email}">
+                    </span>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                    <a class="dropdown-item"
+                       href="/logout">
+                        Logout
+                    </a>
+                </li>
+                <li>
+    <a class="dropdown-item"
+       href="/change-password">
+        Change Password
+    </a>
+</li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</nav>
+
+<div class="container mt-5">
+
+    <div class="text-center mb-5">
+        <h1>Track Every Rupee Smartly</h1>
+        <p class="text-muted">
+            Manage expenses, budgets and reports in one place.
+        </p>
+    </div>
+
+
+<div class="card mb-4 shadow">
+    <div class="card-body">
+
+        <h3>Select Month</h3>
+
+        <form action="/" method="get" class="row g-3">
+
+            <div class="col-md-5">
+                <select name="month" class="form-control" required>
+    <option value="1" th:selected="${selectedMonth == 1}">January</option>
+    <option value="2" th:selected="${selectedMonth == 2}">February</option>
+    <option value="3" th:selected="${selectedMonth == 3}">March</option>
+    <option value="4" th:selected="${selectedMonth == 4}">April</option>
+    <option value="5" th:selected="${selectedMonth == 5}">May</option>
+    <option value="6" th:selected="${selectedMonth == 6}">June</option>
+    <option value="7" th:selected="${selectedMonth == 7}">July</option>
+    <option value="8" th:selected="${selectedMonth == 8}">August</option>
+    <option value="9" th:selected="${selectedMonth == 9}">September</option>
+    <option value="10" th:selected="${selectedMonth == 10}">October</option>
+    <option value="11" th:selected="${selectedMonth == 11}">November</option>
+    <option value="12" th:selected="${selectedMonth == 12}">December</option>
+</select>
+            </div>
+
+            <div class="col-md-5">
+                <input type="number"
+                       name="year"
+                       class="form-control"
+                       placeholder="Year"
+                       th:value="${selectedYear}">
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100">
+                    View
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+
+
+    <!-- Dashboard Cards -->
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h5>Total Expenses</h5>
+                    <h2 th:text="'₹' + ${totalExpenses}">₹0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h5>This Month Budget</h5>
+                    <h2 th:text="'₹' + ${budget}">₹0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h5>Remaining</h5>
+                    <h2 th:text="'₹' + ${remaining}">₹0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 shadow">
+    <div class="card-body">
+
+        <h4>Budget Usage</h4>
+
+        <div class="progress mt-3" style="height:30px;">
+
+            <div class="progress-bar"
+                 role="progressbar"
+                 th:style="'width:' + ${budgetPercentage} + '%'">
+
+                <span th:text="${budgetPercentage} + '%'">0%</span>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+    </div>
+
+    <div class="row g-4 mt-3">
+
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h5>Total Transactions</h5>
+                    <h2 th:text="${totalTransactions}">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h5>Highest Expense</h5>
+                    <h2 th:text="'₹' + ${highestExpense}">₹0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h5>Top Category</h5>
+                    <h2 th:text="${topCategory}">No Data</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="alert mt-4"
+     th:classappend="${isBudgetExceeded} ? 'alert-danger' : 'alert-success'"
+     th:text="${budgetStatus}">
+</div>
+    <!-- Category Chart -->
+    <div class="card mt-5 shadow mx-auto" style="max-width: 650px;">
+        <div class="card-body text-center">
+
+            <h3 class="mb-4">Category-wise Expense Chart</h3>
+
+            <div class="chart-container mx-auto">
+                <canvas id="categoryChart"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Set Monthly Budget -->
+    <div class="card mt-5 shadow">
+        <div class="card-body">
+
+            <h3>Set Monthly Budget</h3>
+
+            <form action="/set-budget" method="post">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <select name="month" class="form-control" required>
+    <option value="">Select Month</option>
+    <option value="1">January</option>
+    <option value="2">February</option>
+    <option value="3">March</option>
+    <option value="4">April</option>
+    <option value="5">May</option>
+    <option value="6">June</option>
+    <option value="7">July</option>
+    <option value="8">August</option>
+    <option value="9">September</option>
+    <option value="10">October</option>
+    <option value="11">November</option>
+    <option value="12">December</option>
+</select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <input type="number"
+                               name="year"
+                               class="form-control"
+                               placeholder="Year"
+                               required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <input type="number"
+                               name="amount"
+                               class="form-control"
+                               placeholder="Budget Amount"
+                               required>
+                    </div>
+
+                </div>
+
+                <button class="btn btn-success mt-3">
+                    Save Budget
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Add New Expense -->
+    <div class="card mt-5 shadow">
+        <div class="card-body">
+
+            <h3>Add New Expense</h3>
+
+            <form action="/add-expense" method="post">
+
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <input type="text"
+                               name="title"
+                               class="form-control"
+                               placeholder="Title"
+                               required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <input type="number"
+                               name="amount"
+                               class="form-control"
+                               placeholder="Amount"
+                               required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <select name="category" class="form-control" required>
+    <option value="">Select Category</option>
+    <option value="Food">Food</option>
+    <option value="Travel">Travel</option>
+    <option value="Shopping">Shopping</option>
+    <option value="Bills">Bills</option>
+    <option value="Education">Education</option>
+    <option value="Health">Health</option>
+    <option value="Entertainment">Entertainment</option>
+    <option value="Other">Other</option>
+</select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <input type="date"
+                               name="expenseDate"
+                               class="form-control"
+                               required>
+                    </div>
+
+                </div>
+
+                <button class="btn btn-primary mt-3">
+                    Save Expense
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="card mt-5 shadow">
+        <div class="card-body">
+
+            <h3>Search by Category</h3>
+
+            <form action="/#expenses" method="get" class="row g-3">
+
+                <div class="col-md-10">
+                    <select name="keyword" class="form-control">
+    <option value="">Select Category</option>
+    <option value="Food" th:selected="${keyword == 'Food'}">Food</option>
+    <option value="Travel" th:selected="${keyword == 'Travel'}">Travel</option>
+    <option value="Shopping" th:selected="${keyword == 'Shopping'}">Shopping</option>
+    <option value="Bills" th:selected="${keyword == 'Bills'}">Bills</option>
+    <option value="Education" th:selected="${keyword == 'Education'}">Education</option>
+    <option value="Health" th:selected="${keyword == 'Health'}">Health</option>
+    <option value="Entertainment" th:selected="${keyword == 'Entertainment'}">Entertainment</option>
+    <option value="Other" th:selected="${keyword == 'Other'}">Other</option>
+</select>
+                </div>
+
+                <div class="col-md-1">
+    <button class="btn btn-dark w-100">
+        Search
+    </button>
+</div>
+
+<div class="col-md-1">
+    <a href="/#expenses" class="btn btn-secondary w-100">
+        Clear
+    </a>
+</div>
+
+            </form>
+
+        </div>
+    </div>
+
+
+    
+
+
+
+<!-- Date Range Filter -->
+<div class="card mt-5 shadow">
+    <div class="card-body">
+
+        <h3>Filter by Date Range</h3>
+
+        <form action="/#expenses" method="get" class="row g-3">
+
+            <div class="col-md-5">
+                <input type="date"
+                       name="startDate"
+                       class="form-control"
+                       th:value="${startDate}">
+            </div>
+
+            <div class="col-md-5">
+                <input type="date"
+                       name="endDate"
+                       class="form-control"
+                       th:value="${endDate}">
+            </div>
+
+            <div class="col-md-1">
+                <button class="btn btn-primary w-100">
+                    Filter
+                </button>
+            </div>
+
+            <div class="col-md-1">
+                <a href="/#expenses" class="btn btn-secondary w-100">
+                    Clear
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+    <!-- Monthly Report -->
+    <div class="card mt-5 shadow">
+        <div class="card-body">
+
+            <h3>Monthly Expense Report</h3>
+
+            <table class="table table-bordered mt-3">
+                <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Total Expense</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="report : ${monthlyReport}">
+                    <td th:text="${report[0]}"></td>
+                    <td th:text="'₹' + ${report[1]}"></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    
+    <!-- Monthly Bar Chart -->
+<div class="card mt-5 shadow">
+    <div class="card-body text-center">
+
+        <h3 class="mb-4">Monthly Expense Trend</h3>
+
+        <div class="bar-chart-container">
+            <canvas id="monthlyChart"></canvas>
+        </div>
+
+    </div>
+</div>
+
+
+    <!-- Recent Expenses -->
+    <div id="expenses" class="card mt-5 mb-5 shadow">
+        <div class="card-body">
+
+            <h3>Recent Expenses</h3>
+            
+            <table class="table table-striped mt-3">
+
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="expense : ${expenses}">
+                    <td th:text="${expense.title}"></td>
+                    <td th:text="'₹' + ${expense.amount}"></td>
+                    <td th:text="${expense.category}"></td>
+                    <td th:text="${expense.expenseDate}"></td>
+
+                    <td>
+                        <a th:href="@{/edit-expense/{id}(id=${expense.id})}"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <form th:action="@{/delete-expense/{id}(id=${expense.id})}"
+                              method="post"
+                              style="display:inline;">
+                            <button type="submit"
+                                    class="btn btn-danger btn-sm">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+
+            </table>
+            <div th:if="${#lists.isEmpty(expenses)}"
+     class="alert alert-info mt-3">
+    No expenses found for the selected month or filter.
+</div>
+
+        </div>
+    </div>
+
+</div>
+<div class="card mt-5 shadow">
+    <div class="card-body text-center">
+        <h3>Download Report</h3>
+        <p class="text-muted">Export all expense records in a clean PDF report format.</p>
+
+        <a href="/export-pdf" class="btn btn-danger">
+    Download PDF Report
+</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script th:inline="javascript">
+    
+    const categoryData = [[${categoryData}]];
+
+    const labels = categoryData.map(item => item[0]);
+    const values = categoryData.map(item => item[1]);
+
+    const ctx = document.getElementById('categoryChart');
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+
+    const monthlyReport = [[${monthlyReport}]];
+
+const monthLabels = monthlyReport.map(item => item[0]);
+const monthValues = monthlyReport.map(item => item[1]);
+
+const monthlyCtx = document.getElementById('monthlyChart');
+
+new Chart(monthlyCtx, {
+    type: 'bar',
+    data: {
+        labels: monthLabels,
+        datasets: [{
+            label: 'Monthly Expense',
+            data: monthValues
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
