@@ -330,35 +330,33 @@
 
             <h3>Search by Category</h3>
 
-            <form action="/#expenses" method="get" class="row g-3">
+            <form action="/#expenses" method="get" class="row g-3 align-items-center">
+    <div class="col-md-8">
+        <select name="keyword" class="form-control">
+            <option value="">Select Category</option>
+            <option value="Food" th:selected="${keyword == 'Food'}">Food</option>
+            <option value="Travel" th:selected="${keyword == 'Travel'}">Travel</option>
+            <option value="Shopping" th:selected="${keyword == 'Shopping'}">Shopping</option>
+            <option value="Bills" th:selected="${keyword == 'Bills'}">Bills</option>
+            <option value="Education" th:selected="${keyword == 'Education'}">Education</option>
+            <option value="Health" th:selected="${keyword == 'Health'}">Health</option>
+            <option value="Entertainment" th:selected="${keyword == 'Entertainment'}">Entertainment</option>
+            <option value="Other" th:selected="${keyword == 'Other'}">Other</option>
+        </select>
+    </div>
 
-                <div class="col-md-10">
-                    <select name="keyword" class="form-control">
-    <option value="">Select Category</option>
-    <option value="Food" th:selected="${keyword == 'Food'}">Food</option>
-    <option value="Travel" th:selected="${keyword == 'Travel'}">Travel</option>
-    <option value="Shopping" th:selected="${keyword == 'Shopping'}">Shopping</option>
-    <option value="Bills" th:selected="${keyword == 'Bills'}">Bills</option>
-    <option value="Education" th:selected="${keyword == 'Education'}">Education</option>
-    <option value="Health" th:selected="${keyword == 'Health'}">Health</option>
-    <option value="Entertainment" th:selected="${keyword == 'Entertainment'}">Entertainment</option>
-    <option value="Other" th:selected="${keyword == 'Other'}">Other</option>
-</select>
-                </div>
+    <div class="col-md-2">
+        <button class="btn btn-dark w-100 text-nowrap">
+            Search
+        </button>
+    </div>
 
-                <div class="col-md-1">
-    <button class="btn btn-dark w-100">
-        Search
-    </button>
-</div>
-
-<div class="col-md-1">
-    <a href="/#expenses" class="btn btn-secondary w-100">
-        Clear
-    </a>
-</div>
-
-            </form>
+    <div class="col-md-2">
+        <a href="/" class="btn btn-secondary w-100 text-nowrap">
+            Clear
+        </a>
+    </div>
+</form>
 
         </div>
     </div>
