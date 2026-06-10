@@ -48,7 +48,9 @@
                                    placeholder="Password"
                                    required>
                         </div>
+                        
 
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
                         <button class="btn btn-primary w-100">
                             Register
                         </button>

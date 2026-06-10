@@ -4,6 +4,7 @@ import com.expensetracker.model.User;
 import com.expensetracker.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -22,9 +23,24 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(User user) {
+    public String register(User user, Model model) {
+
+        if (userRepository.existsByEmail(user.getEmail())) {
+            model.addAttribute(
+                    "error",
+                    "Email already registered. Please login."
+            );
+            return "register";
+        }
+
         userRepository.save(user);
-        return "redirect:/login";
+
+        model.addAttribute(
+                "success",
+                "Registration successful. Please login."
+        );
+
+        return "login";
     }
 
     @GetMapping("/login")
@@ -35,17 +51,25 @@ public class AuthController {
     @PostMapping("/login")
     public String login(String email,
                         String password,
-                        HttpSession session) {
+                        HttpSession session,
+                        Model model) {
 
         User user =
                 userRepository.findByEmailAndPassword(email, password);
 
-        if (user != null) {
-            session.setAttribute("loggedInUser", user);
-            return "redirect:/";
+        if (user == null) {
+
+            model.addAttribute(
+                    "error",
+                    "Invalid email or password."
+            );
+
+            return "login";
         }
 
-        return "redirect:/login";
+        session.setAttribute("loggedInUser", user);
+
+        return "redirect:/";
     }
 
     @GetMapping("/logout")
